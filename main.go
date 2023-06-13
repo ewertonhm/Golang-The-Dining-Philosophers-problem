@@ -55,6 +55,10 @@ func main() {
 }
 
 func dine() {
+	eatTime = 0 * time.Second
+	sleepTime = 0 * time.Second
+	thinkTime = 0 * time.Second
+
 	// wg is the WaitGroup that keeps track of how many philosophers are still at the table. When
 	// it reaches zero, everyone is finished eating and has left. We add 5 (the number of philosophers) to this
 	// wait group.
@@ -97,10 +101,17 @@ func diningProblem(philosopher Philosopher, wg *sync.WaitGroup, forks map[int]*s
 	// eat "hunger" times
 	for i := hunger; i > 0; i-- {
 		// get a lock on both forks
-		forks[philosopher.leftFork].Lock()
-		fmt.Printf("\t%s takes the left fork.\n", philosopher.name)
-		forks[philosopher.rightFork].Lock()
-		fmt.Printf("\t%s takes the right fork.\n", philosopher.name)
+		if philosopher.leftFork > philosopher.rightFork {
+			forks[philosopher.rightFork].Lock()
+			fmt.Printf("\t%s takes the right fork.\n", philosopher.name)
+			forks[philosopher.leftFork].Lock()
+			fmt.Printf("\t%s takes the left fork.\n", philosopher.name)
+		} else {
+			forks[philosopher.leftFork].Lock()
+			fmt.Printf("\t%s takes the left fork.\n", philosopher.name)
+			forks[philosopher.rightFork].Lock()
+			fmt.Printf("\t%s takes the right fork.\n", philosopher.name)
+		}
 
 		fmt.Printf("\t%s has both forks and is eating.\n", philosopher.name)
 		time.Sleep(eatTime)
