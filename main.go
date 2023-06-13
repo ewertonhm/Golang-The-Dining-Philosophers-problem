@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 )
@@ -39,12 +40,15 @@ var hunger = 3                  // how many times a philosopher eats
 var eatTime = 1 * time.Second   // how long it takes to eatTime
 var thinkTime = 3 * time.Second // how long a philosopher thinks
 var sleepTime = 1 * time.Second // how long to wait when printing things out
+var oderMutex sync.Mutex        // a mutex for the slice orderFinished
+var orderFinished []string      // the order in which philosophers finish dining and leave;
 
 func main() {
 	// print out a welcome message
 	fmt.Println("Dining Philosophers Problem")
 	fmt.Println("---------------------------")
 	fmt.Println("The table is empty.")
+	time.Sleep(sleepTime)
 
 	// start the meal
 	dine()
@@ -52,13 +56,13 @@ func main() {
 	// print out finished message
 	fmt.Println("The table is empty.")
 
+	// print the finish order
+	time.Sleep(sleepTime)
+	fmt.Printf("Order finished: %s.\n", strings.Join(orderFinished, ", "))
+
 }
 
 func dine() {
-	eatTime = 0 * time.Second
-	sleepTime = 0 * time.Second
-	thinkTime = 0 * time.Second
-
 	// wg is the WaitGroup that keeps track of how many philosophers are still at the table. When
 	// it reaches zero, everyone is finished eating and has left. We add 5 (the number of philosophers) to this
 	// wait group.
@@ -126,4 +130,9 @@ func diningProblem(philosopher Philosopher, wg *sync.WaitGroup, forks map[int]*s
 	}
 	fmt.Println(philosopher.name, "is satisfied.")
 	fmt.Println(philosopher.name, "left the table.")
+
+	// register the order in witch each philosophers leave the table
+	oderMutex.Lock()
+	orderFinished = append(orderFinished, philosopher.name)
+	oderMutex.Unlock()
 }
